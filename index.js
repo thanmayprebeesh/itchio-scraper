@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
-  res.json("Hello World");
+  res.json("Welcome to Itch.io Scraper");
 });
 
 app.use('/jams', require("./routes/jam"));

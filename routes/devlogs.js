@@ -3,7 +3,7 @@ const router = express.Router();
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-router.get("/devlogs", (req, res) => {
+router.get("/", (req, res) => {
     const devlogs = [];
     
     const sortingList = [
@@ -61,7 +61,8 @@ router.get("/devlogs", (req, res) => {
             const game = $(element).find(".game_title a").text();
             const game_url = $(element).find(".game_title a").attr("href");
             const description = $(element).find(".summary").text();
-            devlogs.push({ name, url, game, game_url, description });
+            const thumbnail = $(element).find(".image_wrapper a img").attr("data-lazy_src");
+            devlogs.push({ name, url, game, game_url, description, thumbnail });
         });
         
         res.json(devlogs);

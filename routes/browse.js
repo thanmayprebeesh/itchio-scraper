@@ -57,12 +57,14 @@ const commonPlatformList = [
     { "title": "browser", "link": "platform-browser/" }
 ]
 const commonSelectors = {
-    container: ".game_cell_data",
+    container: ".game_cell",
     title: ".game_title .title",
     price: ".game_title .price_value",
     url: ".game_title a",
     description: ".game_text",
-    author: ".game_author a"
+    author: ".game_author a",
+    thumbnail: ".thumb_link img",
+    platforms: ".game_platform span"
 }
 
 const categoryUrls = {
@@ -111,12 +113,31 @@ const createScraperRoute = (baseUrl, sortingList, priceList, platformList, timeL
             const results = [];
             $(selectors.container).each((index, element) => {
                 const name = $(element).find(selectors.title).text();
-                const price = $(element).find(selectors.price).text();
+                var price = $(element).find(selectors.price).text();
+                if (price == "")
+                    price = "Free";
                 const url = $(element).find(selectors.url).attr("href");
                 const description = $(element).find(selectors.description).text();
                 const author = $(element).find(selectors.author).text();
+                const author_url = $(element).find(selectors.author).attr("href");
+                const thumbnail = $(element).find(selectors.thumbnail).attr("data-lazy_src");
+
+                const platforms = [];
+                $(element).find(selectors.platforms)
+                    .each((index, element) => {
+                        const text = $(element).attr("title");
+                        if(text != null)
+                            platforms.push(text.split(" ").pop());
+
+                        const browser_text = $(element).text();
+                        if(browser_text != ""){
+                            const resultString = browser_text.split(" ").pop();
+                            platforms.push(`${resultString.charAt(0).toUpperCase()}${resultString.slice(1)}`);
+
+                        }
+                    })
                 
-                results.push({ name, price, url, description, author });
+                results.push({ name, price, url, description, author, author_url, thumbnail, platforms });
             });
             
             res.json(results);

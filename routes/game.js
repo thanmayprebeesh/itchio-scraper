@@ -5,9 +5,9 @@ const cheerio = require("cheerio");
 
 router.get('/', (req, res) => {
     const { creator, name } = req.query;
-    const _url = `https://${creator}.itch.io/${name}`;
+    const baseUrl = `https://${creator}.itch.io/${name}`;
 
-    axios.get(_url)
+    axios.get(baseUrl)
         .then((response) => {
             const html = response.data;
             const $ = cheerio.load(html);
@@ -20,7 +20,15 @@ router.get('/', (req, res) => {
                 };
 
                 const slug = name;
-                const url = _url;
+                var price = $(element).find("[itemprop='price']").text();
+                if(price != ""){
+                    price = price.split(" ")[0];
+                }
+                else{
+                    price = "Free";
+                }
+                    
+                const url = baseUrl;
 
                 const tags = [];
                 $(element).find(".game_info_panel_widget table tbody tr:contains('Tags') td:nth-child(2) a")
@@ -58,11 +66,12 @@ router.get('/', (req, res) => {
                         const text = $(element).attr("href").trim();
                         screenshots.push(text);
                     })
-                res.json({ title, author, slug, url, tags, genres, ratings , platforms, dates, description, screenshots });
+                res.json({ title, author, slug, price, url, tags, genres, ratings , platforms, dates, description, screenshots });
             });      
         })
         .catch((err) => {
-            console.error(err);
+            console.error(`Error scraping ${baseUrl}:`, err);
+            res.status(500).json({ error: "Failed to scrape data." });
         }); 
 });
 
